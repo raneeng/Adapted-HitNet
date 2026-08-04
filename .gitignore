@@ -1,0 +1,11 @@
+# Python virtual environments
+venv/
+
+# Tracknet and YOLO weights
+/data_prep/weights/
+
+# Tuner
+/training/tuner/
+
+# Video files
+*.mp4
