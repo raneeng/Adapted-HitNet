@@ -101,7 +101,7 @@ Each rally that completes produces exactly 4 files: `{stem}_ball_predicted.csv`,
 `{stem}_player_bottom.csv`, `{stem}_player_top.csv`, `{stem}_hit.csv` — a rally is
 only considered done once all 4 exist, which is what `--force`/skip-logic checks.
 
-### What the hit labels actually mean
+### Hit labels
 
 `_hit.csv` has a single `hit` column, one row per frame, values `0` (no hit),
 `1` (bottom/near player hit), `2` (top/far player hit), which correctly accounts for
@@ -192,7 +192,7 @@ python train_hitnet.py
 7. Runs temperature-scaling calibration on the same real validation set.
 8. Saves the final model to `hitnet_model.h5`.
 
-### Known limitation, worth checking before trusting results
+### Known limitation
 
 Top-player (class 2) recall has historically been notably weaker than
 bottom-player recall in this pipeline — the leading hypothesis is weaker YOLO
@@ -236,8 +236,81 @@ visible directly rather than inferred from numbers alone.
 | `render_tracknet_check.py` | Shuttle tracking quality — draws the predicted shuttle position with a fading motion trail per frame, and flags frames where the shuttle wasn't detected at all | `python render_tracknet_check.py --video <clip.mp4> --ball <_ball_predicted.csv>` |
 | `pose_quality_check.py` | Pose tracking quality — two modes: `--stats` aggregates per-keypoint detection rates across your whole dataset (bottom vs. top player), `--overlay` draws both players' skeletons on one rally's video for visual inspection | `python pose_quality_check.py --stats --poses_dir data/poses` or `--overlay --video ... --pose_bottom ... --pose_top ...` |
 | `render_shot_labels.py` | Predicted/ground-truth hit labels — overlays shot markers and player attribution directly on the video, for visually confirming whether detected/predicted hits actually line up with real contact moments | see the script's own `--help` for current usage |
- 
-`render_tracknet_check.py` and `pose_quality_check.py` are the most directly
-useful for the known top-player recall issue above — if you suspect a specific
-rally's poor prediction traces back to bad input data rather than the model
-itself, these are the fastest way to check visually before assuming either way.
+
+
+## Model Performance
+
+The latest HitNet model (last updated **3 August 2026**) was evaluated on a held-out test set of **131,427** frames with three classes:
+
+- **0** – No hit
+- **1** – Bottom player hit
+- **2** – Top player hit
+
+
+### Classification Report
+
+| Class | Precision | Recall | F1-score | Support |
+|------:|----------:|-------:|---------:|--------:|
+| No hit (0) | 0.972 | 0.932 | 0.951 | 105,495 |
+| Bottom hit (1) | 0.780 | 0.911 | 0.840 | 12,793 |
+| Top hit (2) | 0.736 | 0.858 | 0.792 | 13,139 |
+
+Overall metrics:
+
+| Metric | Value |
+|-------|------:|
+| Accuracy | **92.2%** |
+| Macro F1 | **0.861** |
+| Weighted F1 | **0.925** |
+
+
+### Confusion Matrix
+
+| True \\ Pred | No hit | Bottom hit | Top hit |
+|-------------|--------:|-----------:|--------:|
+| No hit | 98,288 | 3,181 | 4,026 |
+| Bottom hit | 1,110 | 11,660 | 23 |
+| Top hit | 1,751 | 115 | 11,273 |
+
+The model correctly identifies over **92%** of frames while achieving strong hit detection performance with high recall for both players. Approximately **11.0%** of true hit frames (2,861 out of 25,932) were missed, corresponding to windows where a true hit was predicted as "no hit."
+
+---
+
+## About the ShuttleSet Dataset
+
+This project is trained and evaluated using the **ShuttleSet** dataset, a large-scale badminton match dataset with fine-grained, stroke-level annotations.
+
+ShuttleSet was annotated by badminton domain experts using the efficient **S2-labeling** tool and the **BLSR** annotation format. The dataset provides stroke-by-stroke ground truth annotations for **44 international badminton matches** played between **2018 and 2021**, featuring **27 elite players** (16 men's singles and 11 women's singles). In total, ShuttleSet contains:
+
+- **104 sets**
+- **3,685 rallies**
+- **36,492 annotated strokes**
+
+By providing high-quality rally and stroke annotations, ShuttleSet has become a valuable benchmark for research in badminton analytics, including stroke recognition, rally analysis, shuttle tracking, player movement analysis, and tactical modeling.
+
+---
+
+## Acknowledgements
+
+This project builds upon and makes use of several excellent open-source resources from the badminton computer vision community.
+
+### MonoTrack
+
+Parts of the shuttle tracking pipeline are adapted from **MonoTrack**, an open-source implementation for shuttle trajectory reconstruction from monocular badminton videos.
+
+**Reference**
+
+> Liu, P., & Wang, J.-H. **MonoTrack: Shuttle Trajectory Reconstruction from Monocular Badminton Video.** CVPR Workshop, 2022.  
+> Paper: https://arxiv.org/abs/2204.01899  
+> Code: https://github.com/jhwang7628/monotrack
+
+### ShuttleSet
+
+This work is trained and evaluated using the **ShuttleSet** dataset, whose high-quality expert annotations make large-scale badminton stroke recognition and rally analysis possible.
+
+**Reference**
+
+> Jiang, Y., Tian, Y., Wang, Y., *et al.* **ShuttleSet: A Large-scale Badminton Dataset for Fine-grained Stroke Recognition.** arXiv:2306.04948, 2023.  
+> https://arxiv.org/pdf/2306.04948
+
+We gratefully acknowledge the authors and contributors of both **MonoTrack** and **ShuttleSet** for making their code, datasets, and research publicly available, enabling further advances in badminton computer vision research.
