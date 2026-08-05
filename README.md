@@ -82,6 +82,10 @@ To create this: run `format_data.py` once for the match first — it downloads t
 video and automatically saves a calibration reference frame
 (`{match_id}_calibration_reference.png`, taken at the first hit of set 1). Then either:
 
+- **Interactive labeling** (needs a GUI-capable display / X11 forwarding):
+```bash
+  python format_data.py --id <match_id> --label_court
+```
 - **Notebook-based labeling** (`label_court.ipynb`):
   
   Input `<match_id>` and run cell. A widget displaying `{match_id}_calibration_reference.png` will appear, left-click 
