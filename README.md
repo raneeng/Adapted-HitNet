@@ -156,6 +156,8 @@ have been generated for *all sets* of the following match ids (see match.csv for
 >*Note: match 27's match video is unavailable on youtube*
 
 ### Future data preparation beyond ShuttleSet data
+>*An extension dataset ShuttleSet22 published at IJCAI-24 Demo & IJCAI-23 IT4PSS Workshop is also released (https://github.com/wywyWang/CoachAI-Projects/tree/main/CoachAI-Challenge-IJCAI2023/ShuttleSet22)*
+
 TrackNet shuttle tracking, and YOLOv8-Pose estimation are directly reusable for new,
 non-ShuttleSet footage as-is
  
