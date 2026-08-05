@@ -9,6 +9,10 @@
 
 # Video files
 *.mp4
+# Image files
+.png
 
 data_prep/__pycache__/
 training/__pycache__/
+
+*/ipynb_checkpoints/
