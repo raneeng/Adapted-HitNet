@@ -1,5 +1,5 @@
 # Python virtual environments
-venv/
+.venv/
 
 # Tracknet and YOLO weights
 /data_prep/weights/
@@ -9,3 +9,6 @@ venv/
 
 # Video files
 *.mp4
+
+data_prep/__pycache__/
+training/__pycache__/

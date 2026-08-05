@@ -6,7 +6,18 @@ Trains a badminton hit-detection model (no-hit [class 0] / bottom-player-hit [cl
 on ShuttleSet match data. 
 
 Two stages: **1) data preparation** (`format_data.py`) builds
-per-rally training inputs from raw ShuttleSet data, then **2) training** (`train_hitnet.py`) consumes those inputs to train and evaluate the model.
+per-rally training inputs from raw ShuttleSet data, then **2) training** (`train_hitnet.py`) consumes those inputs 
+to train and evaluate the model.
+
+## Installation
+ 
+```bash
+pip install -r requirements.txt
+```
+ 
+This installs the combined dependency set for all three stages of this project —
+`format_data.py` (data prep), `train_hitnet.py` (training), and `hitnet_infer.py`
+(inference on new footage) — in one environment. 
 
 ## Directory structure
 
@@ -30,6 +41,23 @@ hitnet/
     hitnet_model.h5           <- final trained model
 ```
 
+## Memory & Hardware Requirements
+
+**GPU**: Memory-intensive — tested on a 48 GB RTX 6000 Ada; monitor `nvidia-smi` if using a smaller card.
+
+**System memory**: Memory-intensive — the hyperparameter search has caused a confirmed OOM kill from 
+TF/Keras memory accumulating across trials.
+
+**Data prep (`format_data.py`)**: Memory-intensive — TrackNet, InpaintNet, and YOLOv8-Pose all run 
+GPU-resident at once on multi-GB videos.
+ 
+## Where to run this
+ 
+Development for this project was done on **JupyterHub**, not local hardware due to 
+memory and hardware requirements. Run long jobs as a background process (`pm2`, `tmux`, `nohup`).
+
+---
+
 ## Stage 1 — Data preparation (`format_data.py`)
 
 Downloads each match's video, slices it into per-rally clips, runs shuttle tracking
@@ -52,17 +80,12 @@ G -------- X      4. Bottom-right (X)
 
 To create this: run `format_data.py` once for the match first — it downloads the
 video and automatically saves a calibration reference frame
-(`{match_id}_calibration_reference.png`, taken at the first hit of set 1) even
-before the `.out` file exists. Use that image to identify the four corners, then
-either:
+(`{match_id}_calibration_reference.png`, taken at the first hit of set 1). Then either:
 
-- **Interactive labeling** (needs a GUI-capable display / X11 forwarding):
-  ```bash
-  python format_data.py --id <match_id> --label_court
-  ```
 - **Notebook-based labeling** (`label_court.ipynb`):
   
-  Input `<match_id>` and run cell. A widget displaying `{match_id}_calibration_reference.png` will appear, left-click to select the 4 corners in ADGX order. Right-click to undo the last selection.
+  Input `<match_id>` and run cell. A widget displaying `{match_id}_calibration_reference.png` will appear, left-click 
+  to select the 4 corners in ADGX order. Right-click to undo the last selection.
   ```python
   %matplotlib widget
   from label_court_notebook import label_court_corners_notebook
@@ -75,8 +98,14 @@ either:
   picker.save()
   ```
 
-One `.out` file covers the *entire match* — the camera doesn't move within a match,
+- **Manual labeling**:
+Open `{match_id}_calibration_reference.png` in in an photo editing app (*e.g. Microsoft Paint*), manually create an 
+{match_id}.out` file and type the court corner coordinates in the required format.
+
+
+One `.out` file covers the *entire match* — the is on the assumption that the main camera doesn't move within a match,
 so it's shared across every set and rally, not re-labeled per set or per rally.
+
 
 ### 2. Run data prep
 
@@ -109,7 +138,8 @@ badminton's side-switching rules (players swap ends each set, plus a mid-set
 switch in a deciding third set once either player's score first reaches 11).
 This is *ground truth*, not inferred from pose proximity the way some reference
 implementations of this idea do. These shot labels are derived directly from
-ShuttleSet's own `player` column via `court_side.py`. Shuttleset convention: player `A` represents match winner (entire match, not set), while player `B` represents match loser.
+ShuttleSet's own `player` column via `court_side.py`. Shuttleset convention: player `A` represents match winner 
+(entire match, not set), while player `B` represents match loser.
 
 ### Current progress with ShuttleSet dataset formatting
 
@@ -123,7 +153,7 @@ have been generated for *all sets* of the following match ids (see match.csv for
 
 >**updated as of 3 Aug 2026**
 
-*Note: match 27's match video is unavailable on youtube*
+>*Note: match 27's match video is unavailable on youtube*
 
 ### Future data preparation beyond ShuttleSet data
 TrackNet shuttle tracking, and YOLOv8-Pose estimation are directly reusable for new,
@@ -148,7 +178,7 @@ the hitnet model is trained and predicts on single-rally data (sliced automatica
      this way risk quietly reinforcing that same weakness in any model
      retrained on them, unless reviewed rather than accepted as-is.
 
-
+---
 
 ## Stage 2 — Training (`train_hitnet.py`)
 
@@ -203,7 +233,8 @@ shuttle movements being scaled down due to shuttle being further from camera.
 
 For rallies you don't have ShuttleSet labels for (e.g. new matches), use
 `hitnet_infer.py` instead of `format_data.py`'s label-derivation step — it needs
-only the ball trajectory, both players' pose CSVs, and the match's court file. It outputs hit predictions in `{stem}_hit_predicted.csv`
+only the ball trajectory, both players' pose CSVs, and the match's court file. It outputs hit predictions 
+in `{stem}_hit_predicted.csv`
 
 > **Output format note**: a single real hit typically registers across *multiple
 > consecutive frames* in this output, not one clean frame — the model's
