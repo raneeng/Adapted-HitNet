@@ -103,8 +103,8 @@ video and automatically saves a calibration reference frame
   ```
 
 - **Manual labeling**:
-Open `{match_id}_calibration_reference.png` in in an photo editing app (*e.g. Microsoft Paint*), manually create an 
-{match_id}.out` file and type the court corner coordinates in the required format.
+Open `{match_id}_calibration_reference.png` in in an photo editing app (*e.g. Microsoft Paint*),
+manually create a `{match_id}.out` file and type the court corner coordinates in the required format.
 
 
 One `.out` file covers the *entire match* — the is on the assumption that the main camera doesn't move within a match,
@@ -149,7 +149,7 @@ ShuttleSet's own `player` column via `court_side.py`. Shuttleset convention: pla
 
 All 4 training inputs: 
 `{stem}_ball_predicted.csv`, `{stem}_player_bottom.csv`, `{stem}_player_top.csv`, `{stem}_hit.csv`
-have been generated for *all sets* of the following match ids (see match.csv for match information):
+have been generated for *all sets* of the following 30 match ids (see match.csv for match information):
 
 - 1 to 7 (inclusive)
 - 21 to 26 (inclusive)
@@ -277,7 +277,46 @@ visible directly rather than inferred from numbers alone.
 
 ## Model Performance
 
-The latest HitNet model (last updated **3 August 2026**) was evaluated on a held-out test set of **131,427** frames with three classes:
+> **Last updated:** 3 Aug 2026
+
+The current hit detection model was trained on **2,504 rally clips** extracted from the ShuttleSet dataset.
+
+### Dataset Split
+
+Training and validation data were split by **match ID** to ensure that rallies from the same match do not appear in both sets.
+
+| Split | Matches | Rallies |
+|-------|--------:|--------:|
+| Training | 24 | 2,034 |
+| Validation | 6 | 470 |
+| **Total** | **30** | **2,504** |
+
+### Match IDs
+
+The dataset consists of ShuttleSet matches:
+
+- **1–7** (inclusive)
+- **21–26** (inclusive)
+- **28–44** (inclusive)
+
+Training matches:
+
+```
+1, 2, 3, 4, 5, 6,
+22, 23, 24, 25, 26,
+28,
+32, 33, 34, 35,
+37, 38, 39, 40, 41, 42, 43, 44
+```
+
+Validation matches:
+
+```
+7, 21, 29, 30, 31, 36
+```
+
+### Evaluation Results
+The latest HitNet model was evaluated on a held-out test set of **131,427** frames with three classes:
 
 - **0** – No hit
 - **1** – Bottom player hit
