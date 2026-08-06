@@ -86,7 +86,7 @@ COURT_L = 13.4  # doubles length (m)
 # matches in ./data:
 # 1 to 7, 21 to 26, 28 to 44 -- id 27 video unavailable on youtube
 # total of 30 matches
-VAL_MATCH_IDS = {"7", "21", "29", "30", "31", "36"} # 5 matches for 80/20 split
+VAL_MATCH_IDS = {"7", "21", "29", "30", "31", "36"} # 6 matches for 80/20 split
 
 
 # ====== FILE READERS ==========================================================
