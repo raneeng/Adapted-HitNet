@@ -41,16 +41,6 @@ hitnet/
     hitnet_model.h5           <- final trained model
 ```
 
-## Memory & Hardware Requirements
-
-**GPU**: Memory-intensive — tested on a 48 GB RTX 6000 Ada; monitor `nvidia-smi` if using a smaller card.
-
-**System memory**: Memory-intensive — the hyperparameter search has caused a confirmed OOM kill from 
-TF/Keras memory accumulating across trials.
-
-**Data prep (`format_data.py`)**: Memory-intensive — TrackNet, InpaintNet, and YOLOv8-Pose all run 
-GPU-resident at once on multi-GB videos.
- 
 ## Where to run this
  
 Development for this project was done on **JupyterHub**, not local hardware due to 
