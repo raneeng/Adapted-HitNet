@@ -160,7 +160,18 @@ def label_court_corners_notebook(match_id: str, overwrite: bool = False) -> Cour
     img = plt.imread(str(ref_path))
     picker = CourtCornerPicker(match_id, out_path)
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    h, w = img.shape[:2]
+    fig_w = 16                                   # inches
+    fig, ax = plt.subplots(figsize=(fig_w, fig_w * h / w), dpi=100)
+    fig.subplots_adjust(left=0, right=1, bottom=0, top=0.95)  # image fills figure
+    ax.imshow(img)
+    ax.set_axis_off()
+
+    # ipympl: let the canvas stretch to the notebook width
+    fig.canvas.header_visible = False
+    fig.canvas.layout.width = "100%"
+    fig.canvas.layout.height = "auto"
+
     ax.imshow(img)
     picker._fig, picker._ax = fig, ax
     picker._update_title()

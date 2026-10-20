@@ -194,25 +194,16 @@ def download_match_video(
         return out_path
 
     height_filter = f"[height<={max_height}]" if max_height else ""
-
-    has_ffmpeg = shutil.which("ffmpeg") is not None
-    if has_ffmpeg:
-        format_selector = (
-            f"bestvideo[ext=mp4][vcodec^=avc1]{height_filter}/"
-            f"bestvideo{height_filter}"
-        )
-    else:
-        print("[WARN] ffmpeg not found on PATH -- can't merge separate "
-              "video/audio streams, so this will fall back to YouTube's "
-              "single-file progressive mp4, which is capped at a lower "
-              "resolution (often 360p). Install ffmpeg to get full "
-              "resolution downloads.")
-        format_selector = f"best[ext=mp4][vcodec^=avc1]{height_filter}/best[ext=mp4]{height_filter}/best{height_filter}"
-
+    # Video-only DASH over plain https: no ffmpeg needed (no merge, no HLS).
+    # fps<=30 keeps frame_num aligned with ShuttleSet's annotations.
+    format_selector = (
+        f"bestvideo[ext=mp4][vcodec^=avc1][protocol=https]{height_filter}[fps<=30]/"
+        f"bestvideo[ext=mp4][protocol=https]{height_filter}[fps<=30]"
+    )
     ydl_opts = {
         "format": format_selector,
         "outtmpl": str(out_path.with_suffix("")) + ".%(ext)s",
-    } 
+    }
 
     has_aria2 = shutil.which("aria2c") is not None
     if has_aria2:
@@ -801,7 +792,7 @@ def save_calibration_reference_frame(
     frames = df["frame_num"].dropna()
     if frames.empty:
         raise ValueError(f"{set1_csv_path} has no valid frame_num values")
-    target_frame = int(frames.min())
+    target_frame = int(frames.min() + 15)
 
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():
