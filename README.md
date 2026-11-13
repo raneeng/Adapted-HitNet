@@ -10,14 +10,44 @@ per-rally training inputs from raw ShuttleSet data, then **2) training** (`train
 to train and evaluate the model.
 
 ## Installation
- 
+
+Data prep and training need **separate environments**: PyTorch (TrackNet, YOLO) uses CUDA 13
+libraries, while TensorFlow 2.21 needs CUDA 12, and the two conflict in one environment.
+
+| Environment | Used for | Requirements |
+|-------------|----------|--------------|
+| `.venv` | `format_data.py`, `format_tagged.py`, court labelling notebook | `requirements-prep.txt` |
+| `.venv-train` | `train_hitnet.py`, `eval_events.py`, `hitnet_infer.py` | `requirements-train.txt` |
+
 ```bash
-pip install -r requirements.txt
+python -m venv .venv
+.venv/bin/pip install -r requirements-prep.txt
+
+python -m venv .venv-train
+.venv-train/bin/pip install -r requirements-train.txt
 ```
- 
-This installs the combined dependency set for all three stages of this project —
-`format_data.py` (data prep), `train_hitnet.py` (training), and `hitnet_infer.py`
-(inference on new footage) — in one environment. 
+
+**TensorFlow GPU fix (training env only).** TensorFlow doesn't find its pip-installed
+`libcusolver` on its own and silently falls back to CPU. Append this to
+`.venv-train/bin/activate` once:
+
+```bash
+# CUDA 12 libs from tensorflow[and-cuda]
+_NV=$(python -c "import nvidia; print(list(nvidia.__path__)[0])" 2>/dev/null)
+[ -n "$_NV" ] && export LD_LIBRARY_PATH=$(find "$_NV" -name "*.so*" -printf "%h\n" | sort -u | paste -sd:)${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+unset _NV
+```
+
+Check with:
+
+```bash
+source .venv-train/bin/activate
+python -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"
+```
+
+For pm2, set the same `LD_LIBRARY_PATH` in the training ecosystem file's `env`, since pm2
+does not run the activate script.
+
 
 ## Directory structure
 
@@ -25,6 +55,7 @@ This installs the combined dependency set for all three stages of this project �
 hitnet/
   data_prep/
     format_data.py
+    format_tagged.py
     shuttleset/              <- ShuttleSet match.csv + per-set CSVs go here
     weights/                 <- TrackNet_best.pt, InpaintNet_best.pt, yolov8s-pose.pt
   training/
@@ -267,43 +298,59 @@ visible directly rather than inferred from numbers alone.
 
 ## Model Performance
 
-> **Last updated:** 3 Aug 2026
+> **Last updated:** 19 Oct 2026 — model file: `hitnet_model_19oct.h5`
 
-The current hit detection model was trained on **2,504 rally clips** extracted from the ShuttleSet dataset.
+The current hit detection model was trained on **7,809 rally clips** from **92 ShuttleSet matches**
+(ids 1–96, excluding 9, 10, 12 and 27, whose match videos are unavailable).
 
 ### Dataset Split
 
-Training and validation data were split by **match ID** to ensure that rallies from the same match do not appear in both sets.
+Rallies are split by **match ID**, so no match contributes to more than one split.
 
-| Split | Matches | Rallies |
-|-------|--------:|--------:|
-| Training | 24 | 2,034 |
-| Validation | 6 | 470 |
-| **Total** | **30** | **2,504** |
+| Split | Matches | Rallies | Used for |
+|-------|--------:|--------:|----------|
+| Training | 60 | 5,132 | Fitting the weights |
+| Validation | 23 | 1,851 | Hyperparameter search, early stopping, LR scheduling |
+| Test | 9 | 826 | Final evaluation only — never used for any training decision |
+| **Total** | **92** | **7,809** | |
 
-### Match IDs
-
-The dataset consists of ShuttleSet matches:
-
-- **1–7** (inclusive)
-- **21–26** (inclusive)
-- **28–44** (inclusive)
+#### Match IDs
 
 Training matches:
 
 ```
-1, 2, 3, 4, 5, 6,
-22, 23, 24, 25, 26,
-28,
-32, 33, 34, 35,
-37, 38, 39, 40, 41, 42, 43, 44
+1, 3, 4, 6, 8, 13, 14, 15, 17, 19, 20, 22, 23, 25, 26, 28,
+32, 33, 34, 35, 37, 39, 41, 42, 44, 45, 46, 48, 50, 51, 52,
+54, 55, 56, 59, 61, 62, 63, 64, 66, 68, 70, 72, 73, 74, 75,
+77, 78, 79, 81, 82, 83, 85, 86, 87, 88, 90, 92, 94, 95
 ```
 
 Validation matches:
 
 ```
-7, 21, 29, 30, 31, 36
+2, 7, 11, 18, 21, 29, 30, 31, 36, 40, 43, 49,
+53, 57, 60, 65, 67, 71, 76, 84, 89, 93, 96
 ```
+
+Test matches:
+
+```
+5, 16, 24, 38, 47, 58, 69, 80, 91
+```
+
+### Model
+
+Bidirectional GRU, selected by a 30-trial Bayesian search on validation macro-F1:
+
+| Hyperparameter | Value |
+|----------------|------:|
+| GRU layers | 3 |
+| GRU units | 256 |
+| Dropout | 0.0 |
+| L2 strength | 1.05e-5 |
+| Learning rate (initial) | 5.1e-4 |
+| Batch size | 256 |
+
 
 ### Evaluation Results
 The latest HitNet model was evaluated on a held-out test set of **131,427** frames with three classes:
@@ -312,39 +359,86 @@ The latest HitNet model was evaluated on a held-out test set of **131,427** fram
 - **1** – Bottom player hit
 - **2** – Top player hit
 
+### Event-level results
 
-### Classification Report
+These measure: **for each real hit, did the model report a hit by the right player within ±T frames?**
+ Window predictions are averaged per frame, each run of hit frames is collapsed into one event at its 
+ peak, and events are matched one-to-one to ground truth (`eval_events.py`).
+
+| Tolerance, T | Bottom P / R / F1 | Top P / R / F1 | Macro F1 | Detection F1 (any player) | Hitter accuracy |
+|----------:|:-----------------:|:--------------:|---------:|--------------------------:|----------------:|
+| ±0 | 0.449 / 0.458 / 0.454 | 0.395 / 0.399 / 0.397 | 0.425 | 0.426 | 100.0% |
+| ±1 | 0.757 / 0.772 / 0.764 | 0.708 / 0.715 / 0.712 | 0.738 | 0.739 | 99.9% |
+| ±2 | 0.938 / 0.956 / 0.947 | 0.886 / 0.895 / 0.891 | 0.919 | 0.920 | 99.9% |
+| **±3** | **0.968 / 0.986 / 0.976** | **0.938 / 0.948 / 0.943** | **0.960** | **0.961** | **99.9%** |
+| ±5 | 0.972 / 0.991 / 0.981 | 0.950 / 0.960 / 0.955 | 0.968 | 0.969 | 99.8% |
+
+- **±2–3 frames is the realistic tolerance**: ShuttleSet's own frame annotations are only
+  accurate to about ±1–2 frames.
+- **Timing:** 76% of detected hits are within ±1 frame of the label and 95% within ±2.
+- **Hitter attribution:** 99.9% of detected hits assigned to the right player.
+- **No outlier matches:** per-match macro-F1 at ±3 ranges from 0.941 to 0.971.
+
+> **Serves are not yet detectable.** `format_data.py` starts each rally clip on the serve
+> frame, so serves fall before any window's prediction region. They make up **10.5%** of
+> test hits (838 / 8,019) and are excluded from the table above. Including them,
+> end-to-end recall at ±3 frames is about **87%**. Fix planned: add pre-roll frames to
+> each rally clip (`START_PAD_FRAMES`) and retrain.
+
+### Comparison with the previous (3 Aug 2026) model
+
+Both models evaluated on the same 9 TEST matches, event-level at ±3 frames:
+
+| Metric | Aug 2026 | **Oct 2026** |
+|--------|---------:|-------------:|
+| Macro F1 | 0.940 | **0.960** |
+| Detection F1 | 0.943 | **0.961** |
+| Bottom precision / recall | 0.938 / 0.982 | **0.968 / 0.986** |
+| Top precision / recall | 0.904 / 0.938 | **0.938 / 0.948** |
+| Hitter accuracy | 99.6% | **99.9%** |
+| Worst performing match (macro F1) | 0.905 | **0.941** |
+
+### Window-level classification report
+
+Per-window metrics (12-frame windows, natural class distribution), as printed by
+`train_hitnet.py`. These are much stricter than the event-level metrics: a hit predicted one
+frame early or late counts as wrong at the window edges, which mainly lowers hit precision.
+
+Test set: **205,871** windows, three classes: **0** no hit, **1** bottom-player hit, **2** top-player hit.
 
 | Class | Precision | Recall | F1-score | Support |
 |------:|----------:|-------:|---------:|--------:|
-| No hit (0) | 0.972 | 0.932 | 0.951 | 105,495 |
-| Bottom hit (1) | 0.780 | 0.911 | 0.840 | 12,793 |
-| Top hit (2) | 0.736 | 0.858 | 0.792 | 13,139 |
+| No hit (0) | 0.970 | 0.932 | 0.950 | 162,905 |
+| Bottom hit (1) | 0.788 | 0.912 | 0.845 | 21,536 |
+| Top hit (2) | 0.755 | 0.861 | 0.805 | 21,430 |
 
-Overall metrics:
+| Metric | Test | Validation |
+|--------|-----:|-----------:|
+| Accuracy | **92.2%** | 92.9% |
+| Macro F1 | **0.867** | 0.873 |
+| Weighted F1 | **0.924** | 0.931 |
 
-| Metric | Value |
-|-------|------:|
-| Accuracy | **92.2%** |
-| Macro F1 | **0.861** |
-| Weighted F1 | **0.925** |
-
-
-### Confusion Matrix
+#### Confusion matrix (test)
 
 | True \\ Pred | No hit | Bottom hit | Top hit |
 |-------------|--------:|-----------:|--------:|
-| No hit | 98,288 | 3,181 | 4,026 |
-| Bottom hit | 1,110 | 11,660 | 23 |
-| Top hit | 1,751 | 115 | 11,273 |
+| No hit | 151,764 | 5,176 | 5,965 |
+| Bottom hit | 1,879 | 19,633 | 24 |
+| Top hit | 2,866 | 107 | 18,457 |
 
-The model correctly identifies over **92%** of frames while achieving strong hit detection performance with high recall for both players. Approximately **11.0%** of true hit frames (2,861 out of 25,932) were missed, corresponding to windows where a true hit was predicted as "no hit."
+Bottom/top confusion is negligible (131 of 42,966 hit windows). The remaining weakness is the
+**top (far) player**: lower recall and precision than the bottom player in every test match,
+most likely because the far player is smaller in frame and their pose detections are less
+reliable.
+
+> The Aug 2026 report (macro F1 0.861) was measured on its *validation* matches, which were
+> also used to select that model, so it is not directly comparable to the test numbers above.
 
 ---
 
-## About the ShuttleSet Dataset
+## Dataset
 
-This project is trained and evaluated using the **ShuttleSet** dataset, a large-scale badminton match dataset with fine-grained, stroke-level annotations.
+This project is trained and evaluated using the **ShuttleSet** and **ShuttleSet22** dataset, a large-scale badminton match dataset with fine-grained, stroke-level annotations.
 
 ShuttleSet was annotated by badminton domain experts using the efficient **S2-labeling** tool and the **BLSR** annotation format. The dataset provides stroke-by-stroke ground truth annotations for **44 international badminton matches** played between **2018 and 2021**, featuring **27 elite players** (16 men's singles and 11 women's singles). In total, ShuttleSet contains:
 
@@ -352,7 +446,7 @@ ShuttleSet was annotated by badminton domain experts using the efficient **S2-la
 - **3,685 rallies**
 - **36,492 annotated strokes**
 
-By providing high-quality rally and stroke annotations, ShuttleSet has become a valuable benchmark for research in badminton analytics, including stroke recognition, rally analysis, shuttle tracking, player movement analysis, and tactical modeling.
+ShuttleSet22 is an extension from ShuttleSet. ShuttleSet22 contains **33,612 strokes (3,992 rallies)** with 35 top-ranking men's singles and women's singles players.
 
 ---
 
