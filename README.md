@@ -73,9 +73,7 @@ hitnet/
 ```
 
 ## Where to run this
- 
-Development for this project was done on **JupyterHub**, not local hardware due to 
-memory and hardware requirements. Run long jobs as a background process (`pm2`, `tmux`, `nohup`).
+Run long jobs as a background process (`pm2`, `tmux`, `nohup`).
 
 ---
 
