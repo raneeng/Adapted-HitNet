@@ -164,22 +164,7 @@ implementations of this idea do. These shot labels are derived directly from
 ShuttleSet's own `player` column via `court_side.py`. Shuttleset convention: player `A` represents match winner 
 (entire match, not set), while player `B` represents match loser.
 
-### Current progress with ShuttleSet dataset formatting
-
-All 4 training inputs: 
-`{stem}_ball_predicted.csv`, `{stem}_player_bottom.csv`, `{stem}_player_top.csv`, `{stem}_hit.csv`
-have been generated for *all sets* of the following 30 match ids (see match.csv for match information):
-
-- 1 to 7 (inclusive)
-- 21 to 26 (inclusive)
-- 28 to 44 (inclusive)
-
->**updated as of 3 Aug 2026**
-
->*Note: match 27's match video is unavailable on youtube*
-
 ### Future data preparation beyond ShuttleSet data
->*An extension dataset ShuttleSet22 published at IJCAI-24 Demo & IJCAI-23 IT4PSS Workshop is also released (https://github.com/wywyWang/CoachAI-Projects/tree/main/CoachAI-Challenge-IJCAI2023/ShuttleSet22)*
 
 TrackNet shuttle tracking, and YOLOv8-Pose estimation are directly reusable for new,
 non-ShuttleSet footage as-is
