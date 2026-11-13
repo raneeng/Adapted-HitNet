@@ -96,7 +96,7 @@ YOLO_WEIGHTS_PATH = WEIGHTS_DIR / "yolov8s-pose.pt"
 TRACKNET_WEIGHTS_DIR = WEIGHTS_DIR
 
 TRAINING_DIR = BASE_DIR / "training"
-INPUT_DATA_DIR = TRAINING_DIR / "data"
+INPUT_DATA_DIR = TRAINING_DIR / "data_pad15"
 VIDEO_DIR = INPUT_DATA_DIR / "videos"
 COURT_DIR = INPUT_DATA_DIR / "court"
 
@@ -255,31 +255,14 @@ def discover_set_csvs(match_id: str) -> list[tuple[int, Path]]:
 
 
 # ── 3. Per-rally frame-range + video slicing ────────────────────────────────
+START_PAD_FRAMES = 15      # frames before the serve; must be >= 11 so every window that labels the serve can see it
 
-def compute_rally_frame_range(
-    rally_df: pd.DataFrame,
-    end_pad_frames: int = END_PAD_FRAMES,
-) -> tuple[int, int]:
-    """Determine a rally's [start_frame, end_frame] from its stroke rows.
-
-    Args:
-        rally_df: Rows from one set's CSV belonging to a single rally
-            (already filtered by the `rally` column).
-        end_pad_frames: Frames appended after the last recorded hit, to
-            better capture the shuttle's landing/outcome beyond the final
-            stroke itself (see module docstring).
-
-    Returns:
-        (start_frame, end_frame) in the *match/set video's own* frame
-        numbering -- not yet rebased to be clip-relative.
-
-    Raises:
-        ValueError: If rally_df is empty or has no valid frame_num values.
-    """
+def compute_rally_frame_range(rally_df, end_pad_frames=END_PAD_FRAMES,
+                              start_pad_frames=START_PAD_FRAMES):
     frames = rally_df["frame_num"].dropna()
     if frames.empty:
         raise ValueError("rally_df has no valid frame_num values")
-    start_frame = int(frames.min())
+    start_frame = max(0, int(frames.min()) - start_pad_frames)
     end_frame = int(frames.max()) + end_pad_frames
     return start_frame, end_frame
 
