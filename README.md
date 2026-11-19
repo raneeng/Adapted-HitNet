@@ -124,6 +124,7 @@ hitnet/
 
 `train_hitnet.py` reads from the folder set in `INPUT_DATA_DIR` (currently `data_pad15/`).
 
+
 ## Where to run this
 
 **An NVIDIA GPU with CUDA is required in practice.** Data prep runs three GPU models per rally
@@ -135,6 +136,13 @@ hundreds of thousands of windows. Both technically run on CPU, but far too slowl
   can share the GPU with data prep or the webapps. Expect slower jobs when they overlap.
 - Both stages take hours for a full dataset. Run them as a background process (`pm2`, `tmux`,
   `nohup`) so they survive a closed terminal.
+
+
+### Getting the training data
+The per-rally data isn't stored in the repo. Download `data_pad15.zip` (and `data.zip`, only
+needed for v1) from the [`data-2026-11-19` release](../../releases/tag/data-2026-11-19) and
+unzip each into its folder: `training/data_pad15/` and `training/data/`.
+`data_prep/shuttleset/shuttleset.zip` holds the ShuttleSet CSVs; unzip it in place.
 
 ---
 

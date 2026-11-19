@@ -15,8 +15,11 @@
 data_prep/__pycache__/
 training/__pycache__/
 
+# Training data: download from the GitHub Release (see README)
+training/data/
+training/data_pad15/
 data_prep/shuttleset/*
-training/data/*
-training/data_pad15/*
+!data_prep/shuttleset/shuttleset.zip
+!data_prep/shuttleset/match.csv
 
 */ipynb_checkpoints/
