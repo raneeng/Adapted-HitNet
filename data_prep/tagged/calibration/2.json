@@ -1,0 +1,317 @@
+{
+  "src_points": [
+    [
+      154,
+      684
+    ],
+    [
+      1116,
+      680
+    ],
+    [
+      893,
+      311
+    ],
+    [
+      373,
+      313
+    ]
+  ],
+  "court_corners_world": [
+    [
+      0.0,
+      0.0
+    ],
+    [
+      6.099999904632568,
+      0.0
+    ],
+    [
+      6.099999904632568,
+      13.399999618530273
+    ],
+    [
+      0.0,
+      13.399999618530273
+    ]
+  ],
+  "homography_matrix": [
+    [
+      0.04225420665105124,
+      0.02494251012555317,
+      -23.567824750140243
+    ],
+    [
+      -0.0005412896658304381,
+      -0.1301801646322199,
+      89.12659121697631
+    ],
+    [
+      2.8731008678875892e-05,
+      0.0082577599269688,
+      1.0
+    ]
+  ],
+  "court_width_m": 6.1,
+  "court_length_m": 13.4,
+  "source": "/home/hpsisporttech/badminton-cv/PRE_processing_webapp/uploads/6262226cfd4b4230be0da3b399c07774.mp4",
+  "court_zones": [
+    {
+      "name": "near_A1",
+      "player": "near",
+      "x_min": 0.46,
+      "x_max": 1.755,
+      "y_min": 5.025,
+      "y_max": 6.7
+    },
+    {
+      "name": "near_A2",
+      "player": "near",
+      "x_min": 1.755,
+      "x_max": 3.05,
+      "y_min": 5.025,
+      "y_max": 6.7
+    },
+    {
+      "name": "near_A3",
+      "player": "near",
+      "x_min": 3.05,
+      "x_max": 4.345,
+      "y_min": 5.025,
+      "y_max": 6.7
+    },
+    {
+      "name": "near_A4",
+      "player": "near",
+      "x_min": 4.345,
+      "x_max": 5.64,
+      "y_min": 5.025,
+      "y_max": 6.7
+    },
+    {
+      "name": "near_B1",
+      "player": "near",
+      "x_min": 0.46,
+      "x_max": 1.755,
+      "y_min": 3.35,
+      "y_max": 5.025
+    },
+    {
+      "name": "near_B2",
+      "player": "near",
+      "x_min": 1.755,
+      "x_max": 3.05,
+      "y_min": 3.35,
+      "y_max": 5.025
+    },
+    {
+      "name": "near_B3",
+      "player": "near",
+      "x_min": 3.05,
+      "x_max": 4.345,
+      "y_min": 3.35,
+      "y_max": 5.025
+    },
+    {
+      "name": "near_B4",
+      "player": "near",
+      "x_min": 4.345,
+      "x_max": 5.64,
+      "y_min": 3.35,
+      "y_max": 5.025
+    },
+    {
+      "name": "near_C1",
+      "player": "near",
+      "x_min": 0.46,
+      "x_max": 1.755,
+      "y_min": 1.6749999999999998,
+      "y_max": 3.35
+    },
+    {
+      "name": "near_C2",
+      "player": "near",
+      "x_min": 1.755,
+      "x_max": 3.05,
+      "y_min": 1.6749999999999998,
+      "y_max": 3.35
+    },
+    {
+      "name": "near_C3",
+      "player": "near",
+      "x_min": 3.05,
+      "x_max": 4.345,
+      "y_min": 1.6749999999999998,
+      "y_max": 3.35
+    },
+    {
+      "name": "near_C4",
+      "player": "near",
+      "x_min": 4.345,
+      "x_max": 5.64,
+      "y_min": 1.6749999999999998,
+      "y_max": 3.35
+    },
+    {
+      "name": "near_D1",
+      "player": "near",
+      "x_min": 0.46,
+      "x_max": 1.755,
+      "y_min": 0.0,
+      "y_max": 1.6749999999999998
+    },
+    {
+      "name": "near_D2",
+      "player": "near",
+      "x_min": 1.755,
+      "x_max": 3.05,
+      "y_min": 0.0,
+      "y_max": 1.6749999999999998
+    },
+    {
+      "name": "near_D3",
+      "player": "near",
+      "x_min": 3.05,
+      "x_max": 4.345,
+      "y_min": 0.0,
+      "y_max": 1.6749999999999998
+    },
+    {
+      "name": "near_D4",
+      "player": "near",
+      "x_min": 4.345,
+      "x_max": 5.64,
+      "y_min": 0.0,
+      "y_max": 1.6749999999999998
+    },
+    {
+      "name": "far_A1",
+      "player": "far",
+      "x_min": 4.345,
+      "x_max": 5.64,
+      "y_min": 6.7,
+      "y_max": 8.375
+    },
+    {
+      "name": "far_A2",
+      "player": "far",
+      "x_min": 3.05,
+      "x_max": 4.345,
+      "y_min": 6.7,
+      "y_max": 8.375
+    },
+    {
+      "name": "far_A3",
+      "player": "far",
+      "x_min": 1.755,
+      "x_max": 3.05,
+      "y_min": 6.7,
+      "y_max": 8.375
+    },
+    {
+      "name": "far_A4",
+      "player": "far",
+      "x_min": 0.45999999999999996,
+      "x_max": 1.755,
+      "y_min": 6.7,
+      "y_max": 8.375
+    },
+    {
+      "name": "far_B1",
+      "player": "far",
+      "x_min": 4.345,
+      "x_max": 5.64,
+      "y_min": 8.375,
+      "y_max": 10.05
+    },
+    {
+      "name": "far_B2",
+      "player": "far",
+      "x_min": 3.05,
+      "x_max": 4.345,
+      "y_min": 8.375,
+      "y_max": 10.05
+    },
+    {
+      "name": "far_B3",
+      "player": "far",
+      "x_min": 1.755,
+      "x_max": 3.05,
+      "y_min": 8.375,
+      "y_max": 10.05
+    },
+    {
+      "name": "far_B4",
+      "player": "far",
+      "x_min": 0.45999999999999996,
+      "x_max": 1.755,
+      "y_min": 8.375,
+      "y_max": 10.05
+    },
+    {
+      "name": "far_C1",
+      "player": "far",
+      "x_min": 4.345,
+      "x_max": 5.64,
+      "y_min": 10.05,
+      "y_max": 11.725000000000001
+    },
+    {
+      "name": "far_C2",
+      "player": "far",
+      "x_min": 3.05,
+      "x_max": 4.345,
+      "y_min": 10.05,
+      "y_max": 11.725000000000001
+    },
+    {
+      "name": "far_C3",
+      "player": "far",
+      "x_min": 1.755,
+      "x_max": 3.05,
+      "y_min": 10.05,
+      "y_max": 11.725000000000001
+    },
+    {
+      "name": "far_C4",
+      "player": "far",
+      "x_min": 0.45999999999999996,
+      "x_max": 1.755,
+      "y_min": 10.05,
+      "y_max": 11.725000000000001
+    },
+    {
+      "name": "far_D1",
+      "player": "far",
+      "x_min": 4.345,
+      "x_max": 5.64,
+      "y_min": 11.725000000000001,
+      "y_max": 13.4
+    },
+    {
+      "name": "far_D2",
+      "player": "far",
+      "x_min": 3.05,
+      "x_max": 4.345,
+      "y_min": 11.725000000000001,
+      "y_max": 13.4
+    },
+    {
+      "name": "far_D3",
+      "player": "far",
+      "x_min": 1.755,
+      "x_max": 3.05,
+      "y_min": 11.725000000000001,
+      "y_max": 13.4
+    },
+    {
+      "name": "far_D4",
+      "player": "far",
+      "x_min": 0.45999999999999996,
+      "x_max": 1.755,
+      "y_min": 11.725000000000001,
+      "y_max": 13.4
+    }
+  ],
+  "player1_end_convention": "near"
+}

@@ -15,4 +15,8 @@
 data_prep/__pycache__/
 training/__pycache__/
 
+data_prep/shuttleset/*
+training/data/*
+training/data_pad15/*
+
 */ipynb_checkpoints/

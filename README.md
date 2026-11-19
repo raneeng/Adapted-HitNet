@@ -1,5 +1,18 @@
 # Adapted-Hitnet
 
+Two models for automated badminton match analysis, both trained on ShuttleSet / ShuttleSet22
+plus matches tagged in the BGL tagging app:
+
+| Model | Task | Input | Code |
+|---|---|---|---|
+| **HitNet** | Hit detection: for every frame, no hit / bottom-player hit / top-player hit | windows of shuttle, pose and court data | `train_hitnet.py` |
+| **Shot-type classifier** | For each detected hit, which of 8 rally-shot types it is | per-shot features from the same shuttle, pose and court data | `shot_lgbm.py` |
+
+The HitNet section comes first, then the [shot-type classifier](#shot-type-classifier).
+Model history and known data issues: [`HITNET_MODEL_NOTES.md`](hitnet_archive/HITNET_MODEL_NOTES.md).
+
+---
+
 ## HitNet Training Pipeline
 
 Trains a badminton hit-detection model (no-hit [class 0] / bottom-player-hit [class 1] / top-player-hit [class 2]).
@@ -13,18 +26,20 @@ from two sources, both producing the same per-rally files:
 | ShuttleSet / ShuttleSet22 matches | `format_data.py` | ShuttleSet's stroke-level annotations |
 | Matches tagged in the BGL tagging app | `format_tagged.py` | The app's exported shot CSV (analyst-reviewed) |
 
-The current model, `hitnet_model_with_serve.h5`, also detects **serves**, which earlier models
+The deployed model, `hitnet_archive/hitnet_model_v2.h5`, also detects **serves**, which earlier models
 could not (see [Model Performance](#model-performance)).
 
 ## Installation
 
-Data prep and training need **separate environments**: PyTorch (TrackNet, YOLO) uses CUDA 13
-libraries, while TensorFlow 2.21 needs CUDA 12, and the two conflict in one environment.
+The project uses **three separate environments**. PyTorch (TrackNet, YOLO) uses CUDA 13
+libraries while TensorFlow 2.21 needs CUDA 12, so they can't share one environment; the
+shot-type classifier gets its own to keep `lazypredict`'s pinned packages away from the others.
 
 | Environment | Used for | Requirements |
 |-------------|----------|--------------|
-| `.venv` | `format_data.py`, `format_tagged.py`, court labelling notebook | `requirements-prep.txt` |
+| `.venv` | `format_data.py`, `format_tagged.py`, `format_shots.py`, court labelling notebook | `requirements-prep.txt` |
 | `.venv-train` | `train_hitnet.py`, `eval_events.py`, `hitnet_infer.py` | `requirements-train.txt` |
+| `.venv-shot` | `shot_lazy_baseline.py`, `shot_lgbm.py` | `requirements-shot.txt` |
 
 ```bash
 python -m venv .venv
@@ -32,6 +47,9 @@ python -m venv .venv
 
 python -m venv .venv-train
 .venv-train/bin/pip install -r requirements-train.txt
+
+python -m venv .venv-shot
+.venv-shot/bin/pip install -r requirements-shot.txt
 ```
 
 **TensorFlow GPU fix (training env only).** TensorFlow doesn't find its pip-installed
@@ -55,6 +73,9 @@ python -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU')
 For pm2, set the same `LD_LIBRARY_PATH` in the training ecosystem file's `env`, since pm2
 does not run the activate script.
 
+> **Always train HitNet from `.venv-train`.** Started from `.venv`, TensorFlow can't find CUDA
+> and silently trains on CPU (~12 min per epoch instead of ~1 min).
+
 
 ## Directory structure
 
@@ -63,26 +84,42 @@ hitnet/
   data_prep/
     format_data.py           <- ShuttleSet -> per-rally HitNet inputs
     format_tagged.py         <- tagging-app export -> the same per-rally HitNet inputs
+    format_shots.py          <- per-rally HitNet inputs + ShuttleSet labels -> shot-type table
+    shot_features.py         <- per-shot features (shuttle, pose, court); shared with BGL
+    shot_mapping.py          <- ShuttleSet stroke type -> analyst shot type mapping
+    court_side.py            <- A/B -> bottom/top per rally (side switches)
+    pose_features.py         <- YOLOv8-Pose player extraction
+    shuttle_features.py      <- TrackNetV3 + InpaintNet shuttle tracking
+    label_court.ipynb        <- notebook court-corner labelling
     shuttleset/              <- ShuttleSet match.csv + per-set CSVs go here
     tagged/                  <- tagging-app shot CSVs + their LOCAL match videos go here
     weights/                 <- TrackNet_best.pt, InpaintNet_best.pt, yolov8s-pose.pt
   training/
-    train_hitnet.py
-    court_side.py
-    eval_events.py
-    hitnet_infer.py
-    data/                    <- original clips (start on the serve frame)
-    data_pad15/              <- clips with 15-frame serve pre-roll (used by the current model)
+    train_hitnet.py          <- HitNet training
+    eval_events.py           <- HitNet event-level evaluation
+    hitnet_infer.py          <- HitNet inference on new rallies
+    shot_lazy_baseline.py    <- shot-type model shortlist (LazyClassifier) + shared split/features
+    shot_lgbm.py             <- shot-type LightGBM tuning, validation and test evaluation
+    data/                    <- clips starting on the serve frame (used by v1)
+    data_pad15/              <- clips with 15-frame serve pre-roll (used by current models)
       videos/                <- full match videos
       rally_video/           <- sliced per-rally clips
       ball_trajectory/       <- per-rally shuttle position CSVs
-      poses/                 <- per-rally pose CSVs (bottom/top)
+      poses/                 <- per-rally pose CSVs (bottom/top -- see note below)
       shot/                  <- per-rally hit label CSVs
+      shot_labels/           <- per-rally shot-type tables + all_shots.csv
       court/                 <- one .out calibration file per match
     tuner/                   <- Keras Tuner search results (delete to force a fresh search)
-    hitnet_model.h5          <- default output of train_hitnet.py
-    hitnet_model_with_serve.h5  <- current model (serves detectable)
-    hitnet_model_19oct.h5    <- previous model (serves not detectable)
+    hitnet_model.h5          <- default output of train_hitnet.py (latest run)
+    shot_lgbm.joblib         <- current shot-type classifier
+  hitnet_archive/
+    HITNET_MODEL_NOTES.md    <- model iterations and known data issues
+    hitnet_model_v2.h5       <- deployed HitNet model (serves detectable)
+    hitnet_model_v2-1.h5     <- v2 retrained on cleaned data (leak-free baseline)
+    hitnet_model_v2-1-search.h5 <- same data, new hyperparameter search (not used)
+    hitnet_model_v1.h5       <- full dataset, serves not detectable
+    hitnet_model_v0.h5       <- original model
+  requirements-prep.txt / requirements-train.txt / requirements-shot.txt
 ```
 
 `train_hitnet.py` reads from the folder set in `INPUT_DATA_DIR` (currently `data_pad15/`).
@@ -92,6 +129,7 @@ hitnet/
 **An NVIDIA GPU with CUDA is required in practice.** Data prep runs three GPU models per rally
 (TrackNet, InpaintNet, YOLOv8-Pose), and training runs a multi-layer bidirectional GRU over
 hundreds of thousands of windows. Both technically run on CPU, but far too slowly to be usable.
+(The shot-type classifier is light and trains in seconds on CPU.)
 
 - `train_hitnet.py` enables TensorFlow memory growth, so it only takes the GPU memory it needs and
   can share the GPU with data prep or the webapps. Expect slower jobs when they overlap.
@@ -112,6 +150,14 @@ only considered done once all 4 exist, which is what `--force`/skip-logic checks
 **Serve pre-roll.** Rally clips start **15 frames before the serve** (`data_pad15/`), so the serve
 hit falls inside a window's prediction region and can be detected. Clips in the original `data/`
 folder start exactly on the serve frame, so their serves are undetectable.
+
+> **Pose file names are swapped (historical).** `_player_top.csv` holds the **near** player
+> (bottom of the image, hitter label 1) and `_player_bottom.csv` the **far** player (label 2).
+> Don't rename them: every model was trained with this order, and HitNet only sees which
+> position each pose fills in its input. **BGL must put the near player's pose (P1) in the same
+> position as `_player_top.csv` fills in training**, or hitter attribution flips.
+> `shot_features.py` handles the mapping via `POSE_FILE_FOR_LABEL`. Details:
+> [`HITNET_MODEL_NOTES.md`](hitnet_archive/HITNET_MODEL_NOTES.md), known data issue 3.
 
 ### Option A — ShuttleSet matches (`format_data.py`)
 
@@ -161,6 +207,11 @@ video and automatically saves a calibration reference frame
 One `.out` file covers the *entire match* — this assumes the main camera doesn't move within a
 match, so it's shared across every set and rally, not re-labeled per set or per rally.
 
+> **Label on the same resolution as the video.** Corners are pixel coordinates, so a `.out`
+> labelled on a 1080p frame is wrong for a 720p video: the far player then falls "off court" and
+> their pose CSV comes out all zeros. This happened to 13 matches (fixed by scaling their corners
+> by 2/3; see `hitnet_archive/HITNET_MODEL_NOTES.md`).
+
 #### 2. Run data prep
 
 ```bash
@@ -187,7 +238,8 @@ switch in a deciding third set once either player's score first reaches 11).
 This is *ground truth*, not inferred from pose proximity the way some reference
 implementations of this idea do. Labels are derived directly from ShuttleSet's own
 `player` column via `court_side.py`. ShuttleSet convention: player `A` is the match winner
-(entire match, not set), player `B` is the match loser.
+(entire match, not set), player `B` is the match loser; `downcourt = 0` in `match.csv` means
+A starts set 1 on the bottom half.
 
 ### Option B — Tagging-app matches (`format_tagged.py`)
 
@@ -225,6 +277,7 @@ Consumes Stage 1's output directly — no separate conversion step.
 
 ```bash
 cd training
+source ../.venv-train/bin/activate
 python train_hitnet.py
 ```
 
@@ -238,8 +291,8 @@ Edit the settings at the top of the file:
 | `VAL_MATCH_IDS`, `TEST_MATCH_IDS` | Matches held out for validation and testing, as **strings** (e.g. `"31"`, `"tag-1"`). Every other match trains. A match can't be in both. |
 | `FIXED_HP` | Hyperparameters to train with directly. Set to `None` to run the Bayesian search instead. |
 
-- **Changing the search space** in `build_model()` makes an existing `tuner/` folder
-  incompatible — delete it before rerunning.
+- **Changing the search space** in `build_model()`, or the data, makes an existing `tuner/`
+  folder stale — delete it before rerunning the search.
 - **GPU/XLA setup**: if you hit `libdevice not found` errors, set
   `XLA_FLAGS=--xla_gpu_cuda_data_dir=/path/to/nvidia/cuda_nvcc` (find the right
   path with `find / -name libdevice.10.bc`) before running, or add the missing
@@ -267,7 +320,11 @@ Edit the settings at the top of the file:
 7. Saves the model to `hitnet_model.h5`.
 
 Event-level metrics (did each real hit get detected, by the right player, within ±T frames?)
-are computed separately with `eval_events.py`.
+are computed separately with `eval_events.py`:
+
+```bash
+python eval_events.py --model ../hitnet_archive/hitnet_model_v2.h5
+```
 
 ### Known limitation
 
@@ -282,7 +339,7 @@ court file, and writes predictions to `{stem}_hit_predicted.csv`.
 
 ```bash
 python hitnet_infer.py \
-    --model hitnet_model_with_serve.h5 \
+    --model hitnet_archive/hitnet_model_v2.h5 \
     --stem <match_id>_set<N>_<rally> \
     --data_dir training/data_pad15 \
     --temperature <calibrated temperature>
@@ -300,7 +357,7 @@ python hitnet_infer.py \
 
 ## Debugging tools
 
-Three visualization tools for spot-checking specific rallies, each overlaying its subject onto
+Visualization tools for spot-checking specific rallies, each overlaying its subject onto
 the rally video so problems are visible directly rather than inferred from numbers alone.
 
 | Tool | Checks | Usage |
@@ -316,50 +373,156 @@ All results are **event-level** (`eval_events.py`): for each real hit, did the m
 hit by the right player within ±T frames? **±3 frames is the realistic tolerance**, since
 ShuttleSet's own frame annotations are only accurate to about ±1–2 frames.
 
-### Current model: `hitnet_model_with_serve.h5`
+All models below are scored on the **same cleaned test set**: 9 matches (ShuttleSet `5, 16, 24,
+38, 58, 69, 80, 91` + `tag-3`), 783 rallies, 7,682 hits, serves included.
 
-- **Detects serves.** Trained on clips with a 15-frame serve pre-roll, so every hit is
-  predictable — previously ~10.5% of hits (the serves) could never be detected.
-- **Architecture:** 4-layer bidirectional GRU, 256 units, no dropout, L2 4.7e-7, initial
-  learning rate 5.6e-4 (settled by two Bayesian searches, Oct 2026).
-- **Split by match:** validation = 23 ShuttleSet matches + `tag-1`; test = 9 ShuttleSet
-  matches + `tag-3`; all other matches train.
+| Model | Serves | Macro F1 | Detection P / R | Bottom F1 | Top F1 | Hitter acc. |
+|---|:---:|---:|---|---:|---:|---:|
+| v0 `hitnet_model_v0.h5` (Aug 2026) | No | 0.895 | 0.912 / 0.898 | 0.925 | 0.865 | 98.8% |
+| v1 `hitnet_model_v1.h5` (Oct 2026) | No | 0.909 | 0.948 / 0.886 | 0.925 | 0.894 | 99.3% |
+| **v2 `hitnet_model_v2.h5`** (Nov 2026, **deployed**) | **Yes** | **0.949** | **0.946 / 0.966** | **0.963** | **0.935** | 99.1% |
+| v2.1 `hitnet_model_v2-1.h5` (Nov 2026) | **Yes** | 0.940 | 0.935 / 0.948 | 0.955 | 0.924 | **99.8%** |
 
-**Validation results** (24 matches, 1,896 rallies, 18,914 hits, serves included):
+Versioning: a major version adds a capability (v2 = serve detection); a minor version retrains
+the same setup (v2.1 = v2 on cleaned data).
 
-| Tolerance | Bottom P / R | Top P / R | Macro F1 | Detection recall | Hitter accuracy |
-|----------:|:------------:|:---------:|---------:|-----------------:|----------------:|
-| ±1 | 0.767 / 0.800 | 0.720 / 0.748 | 0.758 | 0.787 | 98.1% |
-| ±2 | 0.886 / 0.923 | 0.852 / 0.885 | 0.886 | 0.919 | 98.1% |
-| **±3** | **0.914 / 0.952** | **0.889 / 0.924** | **0.920** | **0.953** | **98.1%** |
+- **v2** is a 4-layer bidirectional GRU, 256 units, no dropout, L2 4.7e-7, initial learning
+  rate 5.6e-4, trained on `data_pad15/` (15-frame serve pre-roll). The main gain over v1 is
+  end-to-end recall (0.966 vs 0.886), because serves (~10% of hits) are now detectable.
+- **v2.1** has the same settings, retrained on the cleaned data (duplicate matches removed,
+  far-player poses fixed in 13 matches). It is the only model with no leakage into the test set.
+  Excluding match 38 (whose duplicate was in v2's training set), v2 still scores slightly higher
+  (0.950 vs 0.945), mostly from better recall, while v2.1 attributes the hitter more accurately
+  (99.8% vs 99.1%). **v2 stays deployed**; v2.1 is the leak-free baseline for future changes.
+- **The v0–v2 numbers are somewhat optimistic.** v0 trained on test matches 5, 24 and 38; v1 and
+  v2 were trained on data containing duplicate matches (test match 38's duplicate was in their
+  training set).
 
-- **Timing:** 81% of detected hits are within ±1 frame of the label, 95% within ±2.
-- **Weakest matches:** 21 and 29 (macro F1 0.77–0.79 at ±3), held down by low precision for
-  both players. The other 22 matches score 0.86–0.98.
+Full details per model, the data issues and their fixes: [`HITNET_MODEL_NOTES.md`](hitnet_archive/HITNET_MODEL_NOTES.md).
 
-> **Test-set results pending.** Validation matches were used for model selection, so these
-> numbers are likely slightly optimistic. Run `eval_events.py` on the test matches for the
-> number to report.
+---
 
-### Model history
+## Shot-type classifier
 
-Event-level, ±3 frames.
+Classifies each hit into one of **8 rally-shot types** (the analysts' list, with forehand /
+backhand removed): `net`, `net lift`, `net kill`, `block`, `drive`, `clear`, `smash`,
+`dropshot`. **Serves** are handled separately (the first shot of every rally is a serve; only
+short vs long has to be decided). Racket face (forehand / backhand) is planned as a separate
+model later.
 
-| | Aug 2026 | Oct 2026 (`hitnet_model_19oct.h5`) | **With serve (current)** |
-|---|---:|---:|---:|
-| Evaluated on | Test (9 matches) | Test (9 matches) | Validation (24 matches) |
-| Serves detectable | No | No | **Yes** |
-| Macro F1 (serves excluded from scoring) | 0.940 | 0.960 | — |
-| Macro F1 (serves included) | — | — | 0.920 |
-| End-to-end hit recall (serves included) | — | ~87% | **95.3%** |
-| Hitter accuracy | 99.6% | 99.9% | 98.1% |
-| Worst match (macro F1) | 0.905 | 0.941 | 0.774 |
+### Pipeline
 
-- **The main gain is end-to-end recall:** the Oct model scored well on the hits it *could* see,
-  but missed every serve, so only ~87% of all hits were found. The current model finds 95.3%.
-- **The columns aren't directly comparable yet.** The current model is scored on validation with
-  serves included, the older ones on test with serves excluded. Its lower hitter accuracy and
-  worst-match score should be rechecked on the test set before drawing conclusions.
+```
+data_pad15/ (ball, poses, court, clips)  +  ShuttleSet per-set CSVs
+        │
+        ▼
+format_shots.py  ──uses──>  shot_features.py, shot_mapping.py, court_side.py
+        │
+        ▼
+data_pad15/shot_labels/{stem}_shots.csv, all_shots.csv     (one row per stroke)
+        │
+        ▼
+shot_lazy_baseline.py   (shortlist of models)  ->  shot_lgbm.py   (tune, validate, test)
+        │
+        ▼
+shot_lgbm.joblib
+```
+
+### 1. Build the shot table (`format_shots.py`, in `.venv`)
+
+```bash
+cd data_prep
+python format_shots.py --all          # every ShuttleSet match with a court file
+python format_shots.py --id 29 30     # specific matches
+```
+
+From ShuttleSet it takes **only** the hit frame (rebased to the rally clip, same indexing as
+`_hit.csv`), the hitter (A/B → bottom/top via `court_side.py`) and the shot type label. Every
+feature is computed by `shot_features.py` from the TrackNet / YOLO / court files — the same
+inputs BGL has at inference — so no annotator-only information (ShuttleSet positions, heights,
+areas) reaches the model. Rallies whose four HitNet files don't exist are skipped; tagged
+matches (`tag-*`) are skipped by `--all`.
+
+Each row also has `keep` / `drop_reason`. Strokes are dropped for: ShuttleSet type `未知球種`
+(unknown), backhand smashes (no analyst label), or a missing frame.
+
+### 2. Label mapping (`shot_mapping.py`)
+
+ShuttleSet types are mapped to the analysts' labels; the model trains on the label without
+racket face (`base_type`).
+
+| Analyst label | ShuttleSet types |
+|---|---|
+| FH / BH net | 放小球 net shot, 勾球 cross-court net shot |
+| Block | 擋小球 return net, 防守回挑 defensive return lob |
+| FH smash | 殺球 smash, 點扣 wrist smash (backhand versions dropped) |
+| FH / BH net lift | 挑球 lob, **推球 push** |
+| FH / BH clear | 長球 clear |
+| FH / BH drive | 平球 drive, 小平球 driven flight, 防守回抽 defensive return drive |
+| FH / BH dropshot | 切球 drop, 過度切球 passive drop, 後場抽平球 back-court drive |
+| FH / BH net kill | 撲球 rush |
+| FH / BH low serve | 發短球 short service |
+| FH high serve / BH flick serve | 發長球 long service |
+| *(dropped)* | 未知球種 unknown |
+
+
+### 3. Features (`shot_features.py`)
+
+Computed per shot from the shuttle trajectory, both players' poses and the court homography.
+Positions are expressed **from the hitter's point of view** (lateral > 0 = hitter's right,
+depth = metres behind the net), so a shot gets the same features from either end of the court.
+Which half the hitter is on (`hitter_near`) is measured from their YOLO feet, not assumed.
+
+| Group | Features |
+|---|---|
+| Positions (m) | `hitter_lat`, `hitter_depth`, `opp_lat`, `opp_depth`, `land_lat`, `land_depth`, `shot_distance`, `lat_change`, `hitter_move_speed`, `hitter_near` |
+| Timing | `flight_s` (to next shot), `prev_gap_s` (since previous shot), `is_last` |
+| Shuttle (image, court-normalised) | `contact_above_head`, `apex_above_start`, `apex_above_end`, `mean_speed`, `img_dx`, `img_dy_fwd`, `launch_vx`, `launch_vy_up`, `launch_speed`, `shuttle_detect_rate` |
+| Hitter pose at contact | `wrist_above_head`, `elbow_angle`, `shoulder_angle`, `wrist_lat_offset`, `knee_angle_min`, `knee_angle_max`, `stance_width`, `torso_lean`, `jump`, `pose_detect_rate` |
+| Rally context (previous stroke) | `prev_launch_speed`, `prev_launch_vy_up`, `prev_contact_above_head`, `prev_hitter_depth` |
+
+Landing position is the receiver's feet at their next contact (the shuttle's 3D landing point
+isn't observable); for the last shot of a rally it's the shuttle's last tracked point.
+
+### 4. Train and evaluate (in `.venv-shot`)
+
+```bash
+cd training
+python shot_lazy_baseline.py   # quick shortlist of ~12 classifiers on validation -> lazy_results.csv
+python shot_lgbm.py            # tune LightGBM, validation report, saves shot_lgbm.joblib
+python shot_lgbm.py --test     # final evaluation on TEST -- run once, after tuning
+```
+
+The split matches HitNet's (by match, duplicates removed): validation = 21 ShuttleSet matches,
+test = `5, 16, 24, 38, 58, 69, 80, 91`. Serves are excluded (`keep & ~is_serve`).
+
+### Results
+
+LightGBM was the best of the shortlist (with XGBoost and HistGradientBoosting essentially tied).
+Tuned settings: `num_leaves` 63, `min_child_samples` 50, `class_weight="balanced"`, learning
+rate 0.05, 173 trees.
+
+| Split | Shots | Accuracy | Balanced accuracy | Macro F1 |
+|---|---:|---:|---:|---:|
+| Train | 44,606 | | | |
+| Validation (21 matches) | 15,062 | 0.894 | 0.852 | 0.844 |
+| **Test (8 matches)** | **6,479** | **0.893** | **0.845** | **0.841** |
+
+Per-class F1 on test:
+
+| net lift | clear | net | smash | dropshot | block | net kill | drive |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0.951 | 0.939 | 0.921 | 0.899 | 0.875 | 0.816 | 0.756 | 0.570 |
+
+Main confusions (test): **net ↔ block** (6.6% / 8.0%), **dropshot ↔ smash** (9.7% / 5.7%),
+**drive → block** (22% of drives). The most important features are flight time, time since the
+previous shot, hitter and landing depth, and the shuttle's launch angle.
+
+### Serves
+
+Not part of the classifier. Short vs long can be decided from `land_depth` (and `flight_s`)
+of the first shot; combined with racket face this gives the analysts' serve labels
+(low serve, high serve, flick serve).
 
 ---
 
@@ -374,6 +537,10 @@ ShuttleSet was annotated by badminton domain experts using the efficient **S2-la
 - **36,492 annotated strokes**
 
 ShuttleSet22 is an extension from ShuttleSet. ShuttleSet22 contains **33,612 strokes (3,992 rallies)** with 35 top-ranking men's singles and women's singles players.
+
+> **Duplicates excluded.** ShuttleSet22 ids **45–51 and 96** are re-uploads of ShuttleSet matches
+> 23, 38, 39, 41, 42, 43, 44 and 24 (same YouTube video). They are excluded from all training and
+> evaluation; `match.csv` is left unchanged.
 
 ---
 
@@ -400,4 +567,4 @@ This work is trained and evaluated using the **ShuttleSet** dataset, whose high-
 > Jiang, Y., Tian, Y., Wang, Y., *et al.* **ShuttleSet: A Large-scale Badminton Dataset for Fine-grained Stroke Recognition.** arXiv:2306.04948, 2023.  
 > https://arxiv.org/pdf/2306.04948
 
-We gratefully acknowledge the authors and contributors of both **MonoTrack** and **ShuttleSet** for making their code, datasets, and research publicly available, enabling further advances in badminton computer vision research.
+I gratefully acknowledge the authors and contributors of both **MonoTrack** and **ShuttleSet** for making their code, datasets, and research publicly available, enabling further advances in badminton computer vision research.

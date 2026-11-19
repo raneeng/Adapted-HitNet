@@ -7,8 +7,8 @@ id,video,tournament,round,year,month,day,set,duration,winner,loser,downcourt,url
 6,Kento_MOMOTA_CHOU_Tien_Chen_Denmark_Open_2018_Finals,Denmark Open 2018,Finals,2018,10,21,3,77,Kento MOMOTA,CHOU Tien Chen,1,https://www.youtube.com/watch?v=SYyvDrUgClc
 7,Kento_MOMOTA_CHOU_Tien_Chen_Malaysia_Open_2018_QuarterFinals,Malaysia Open 2018,Quarter-finals,2018,6,29,2,53,Kento MOMOTA,CHOU Tien Chen,0,https://www.youtube.com/watch?v=Y0tCJ6DWXKM
 8,CHOU_Tien_Chen_Anders_ANTONSEN_Fuzhou_Open_2019_Semi-finals,Fuzhou Open 2019,Semi-finals,2019,11,9,2,45,CHOU Tien Chen,Anders ANTONSEN,0,https://www.youtube.com/watch?v=32j2Tg64Zbg
-9,CHOU_Tien_Chen_Jonatan_CHRISTIE_Sudirman_Cup_2019_Quarter-finals,Sudirman Cup 2019,Quarter-finals,2019,5,24,2,36,CHOU Tien Chen,Jonatan CHRISTIE,1,https://www.youtube.com/watch?v=8E98Gpk-fOM
-10,CHOU_Tien_Chen_NG_Ka_Long_Angus_Sudirman_Cup_2019_Group_Stage,Sudirman Cup 2019,Group-Stage,2019,5,19,2,41,CHOU Tien Chen,NG Ka Long Angus,0,https://www.youtube.com/watch?v=li1sbr6S34g
+9,CHOU_Tien_Chen_Jonatan_CHRISTIE_Sudirman_Cup_2019_Quarter-finals,Sudirman Cup 2019,Quarter-finals,2019,5,24,2,36,CHOU Tien Chen,Jonatan CHRISTIE,1,
+10,CHOU_Tien_Chen_NG_Ka_Long_Angus_Sudirman_Cup_2019_Group_Stage,Sudirman Cup 2019,Group-Stage,2019,5,19,2,41,CHOU Tien Chen,NG Ka Long Angus,0,
 11,CHOU_Tien_Chen_Jonatan_CHRISTIE_Indonesia_Open_2019_Quarter-finals,Indonesia Open 2019,Quarter-finals,2019,7,19,3,76,CHOU Tien Chen,Jonatan CHRISTIE,0,https://www.youtube.com/watch?v=yD6WKVqsAKc
 12,NG_Ka_Long_Angus_SHI_Yu_Qi_Thailand_Masters_2020_SemiFinals,Thailand Masters 2020,Semi-finals,2020,1,25,2,37,NG Ka Long Angus,SHI Yuqi,1,
 13,Kento_MOMOTA_Viktor_AXELSEN_Malaysia_Masters_2020_Finals,Malaysia Masters 2020,Finals,2020,1,12,2,54,Kento MOMOTA,Viktor AXELSEN,1,https://www.youtube.com/watch?v=boQC4J4E1ZQ
@@ -43,3 +43,61 @@ id,video,tournament,round,year,month,day,set,duration,winner,loser,downcourt,url
 42,Pusarla_V._Sindhu_Pornpawee_Chochuwong_HSBC_BWF_WORLD_TOUR_FINALS_2020_QuarterFinals,HSBC BWF WORLD TOUR FINALS 2020,Quarter-finals,2021,1,29,2,42,PUSARLA V. Sindhu,Pornpawee CHOCHUWONG,0,https://www.youtube.com/watch?v=Mawo3l3Hb9E
 43,Carolina_Marin_Pornpawee_Chochuwong_HSBC_BWF_WORLD_TOUR_FINALS_2020_SemiFinals,HSBC BWF WORLD TOUR FINALS 2020,Semi-finals,2021,1,30,2,40,Carolina MARIN,Pornpawee CHOCHUWONG,0,https://www.youtube.com/watch?v=vfzkc3lFTdM
 44,Anders_Antonsen_Viktor_Axelsen_HSBC_BWF_WORLD_TOUR_FINALS_2020_Finals,HSBC BWF WORLD TOUR FINALS 2020,Finals,2021,1,31,3,60,Anders ANTONSEN,Viktor AXELSEN,0,https://www.youtube.com/watch?v=j7_cjmJDYNU
+45,,,,,,,,,,,,
+46,,,,,,,,,,,,
+47,,,,,,,,,,,,
+48,,,,,,,,,,,,
+49,,,,,,,,,,,,
+50,,,,,,,,,,,,
+51,,,,,,,,,,,,
+52,Lakshya_SEN_LOH_Kean_Yew_YONEX_SUNRISE_India_Open_2022_ Finals,YONEX-SUNRISE India Open 2022,Finals,2022,1,16,2,54,Lakshya SEN,LOH Kean Yew,1,https://www.youtube.com/watch?v=7_O5r9CLOVw
+53,Kunlavut_VITIDSARN_LEE_Zii_Jia_YONEX_GAINWARD_German_Open_2022_SemiFinals,YONEX GAINWARD German Open 2022,Semi-finals,2022,3,12,2,43,Kunlavut VITIDSARN,LEE Zii Jia,1,https://www.youtube.com/watch?v=44uw3YUvKhc
+54,Akane_YAMAGUCHI_AN_Seyoung_YONEX_All_England_Open_Badminton_Championships_2022_Finals,YONEX All England Open Badminton Championships 2022,Finals,2022,3,20,2,44,Akane YAMAGUCHI,An Se Young,1,https://www.youtube.com/watch?v=bR80_ydY0Is
+55,Viktor_AXELSEN_Lakshya_SEN_YONEX_All_England_Open_2022_Finals,YONEX All England Open Badminton Championships 2022,Finals,2022,3,20,2,53,Viktor AXELSEN,Lakshya SEN,0,https://www.youtube.com/watch?v=qkhmuCNrsNI
+56,AN_Seyoung_PUSARLA_V._Sindhu_Korea_Open_Badminton_Championships_2022_Semi_Final,Korea Open Badminton Championships 2022,Semi-finals,2022,4,9,2,48,An Se Young,PUSARLA V. Sindhu,1,https://www.youtube.com/watch?v=7twuaoi-NCo
+57,He_Bing_Jiao_Chen_Yu_Fei_GWANGJU_YONEX_Korea_Masters_2022_Final,GWANGJU YONEX Korea Masters 2022,Finals,2022,4,17,3,63,HE Bingjiao,CHEN Yufei,0,https://www.youtube.com/watch?v=yAhaun3PLJA
+58,Viktor_AXELSEN_Anthony_Sinisuka_GINTING_DAIHATSU_INDONESIA_MASTERS_2022_Semifinals,DAIHATSU INDONESIA MASTERS 2022,Semi-finals,2022,6,11,2,48,Viktor AXELSEN,Anthony Sinisuka GINTING,0,https://www.youtube.com/watch?v=Ye8h7LS3k6A
+59,Viktor_AXELSEN_LEE_Zii_Jia_EAST_VENTURES_Indonesia_Open_2022_Semifinals,INDONESIA OPEN 2022,Semi-finals,2022,6,18,3,70,Viktor AXELSEN,LEE Zii Jia,0,https://www.youtube.com/watch?v=EtNgRzyACDI
+60,Kento_MOMOTA_Kunlavut_VITIDSARN_Malaysia_Open_2022_ Semi_finals,Malaysia Open 2022,Semi-finals,2022,7,2,2,42,Kento MOMOTA,Kunlavut VITIDSARN,1,https://www.youtube.com/watch?v=A4boA9DUhmA
+61,Viktor_AXELSEN_Jonatan_CHRISTIE_Malaysia_Open_2022_SemiFinals,Malaysia Open 2022,Semi-finals,2022,7,2,3,71,Viktor AXELSEN,Jonatan CHRISTIE,0,https://www.youtube.com/watch?v=-LJAfc98svI
+62,Viktor_AXELSEN_Kento_MOMOTA_PETRONAS_Malaysia_Open_2022_Finals,Malaysia Open 2022,Finals,2022,7,3,2,34,Viktor AXELSEN,Kento MOMOTA,0,https://www.youtube.com/watch?v=pQpYiyFMg2c
+63,Ratchanok_INTANON_CHEN_Yu_Fei_PETRONAS_Malaysia_Open_2022_Finals,Malaysia Open 2022,Finals,2022,7,3,3,65,Ratchanok INTANON,CHEN Yufei,0,https://www.youtube.com/watch?v=4X0a8QREFoI
+64,Ratchanok_INTANON_WANG_Zhi_Yi_Malaysia_Open_2022_SemiFinals,Malaysia Open 2022,Semi-finals,2022,7,2,2,38,Ratchanok INTANON,WANG Zhi Yi,0,https://www.youtube.com/watch?v=4vDZ27e0ws0
+65,Chico_Aura_DWI_WARDOYO_LU_Guang_Zu_PERODUA_Malaysia_Masters_2022_Semifinals,Malaysia Open 2022,Semi-finals,2022,7,9,3,57,Chico Aura DWI WARDOYO,LU Guang Zu,1,https://www.youtube.com/watch?v=0YHy6RpbNn0
+66,Chico_Aura_DWI_WARDOYO_NG_Ka_Long_Angus_Malaysia_Masters_2022_Finals,Malaysia Masters 2022,Finals,2022,7,10,2,45,Chico Aura DWI WARDOYO,NG Ka Long Angus,1,https://www.youtube.com/watch?v=owxx0x4yR7M
+67,An_Se_Young_Chen_Yu_Fei_PERODUA_Malaysia_Masters_2022_Finals,Malaysia Masters 2022,Finals,2022,7,10,2,38,An Se Young,CHEN Yufei,0,https://www.youtube.com/watch?v=uBZx_HX311s
+68,AN_Se_Young_Gregoria_Mariska_TUNJUNG_Malaysia_Masters_2022_SemiFinals,Malaysia Masters 2022,Semi-finals,2022,7,9,3,57,An Se Young,Gregoria Mariska TUNJUNG,1,https://www.youtube.com/watch?v=6KpzrSmm6SA
+69,EAST_VENTURES_Indonesia_Open_2022_Zhao_Jun_Peng_PRANNOY_H._S._Semifinals,INDONESIA OPEN 2022,Semi-finals,2022,6,18,2,40,ZHAO Jun Peng,PRANNOY H. S.,1,https://www.youtube.com/watch?v=NfCjzOiCTjk
+70,Kunlavut_VITIDSARN_ZHAO_Jun_ Peng_BWF_World_Championships_2022_SemiFinals,BWF World Championships 2022,Semi-finals,2022,8,27,2,43,Kunlavut VITIDSARN,ZHAO Jun Peng,0,https://www.youtube.com/watch?v=AumCrKc4L1U
+71,Akane_YAMAGUCHI_AN_Se_Young_BWF_World_Championships_2022_Semi_finals,BWF World Championships 2022,Semi-finals,2022,8,27,2,43,Akane YAMAGUCHI,An Se Young,0,https://www.youtube.com/watch?v=uwI5G78YJ6o
+72,Viktor_Axelsen_Kunlavut_Vitidsarn_BWF_World_Championships_2022_Finals,BWF World Championships 2022,Finals,2022,8,28,2,50,Viktor AXELSEN,Kunlavut VITIDSARN,0,https://www.youtube.com/watch?v=c700deh2tCs
+73,Akane_YAMAGUCHI_CHEN_Yu_Fei_BWF_World_Championships_2022_Finals,BWF World Championships 2022,Finals,2022,8,28,3,68,Akane YAMAGUCHI,CHEN Yufei,1,https://www.youtube.com/watch?v=-1XEQDa27eA
+74,Kenta_NISHIMOTO_Anders_ANTONSEN_Japan_Open_2022_SemiFinals,Japan Open 2022,Semi-finals,2022,9,3,2,69,Kenta NISHIMOTO,Anders ANTONSEN,1,https://www.youtube.com/watch?v=WLqSMbwxgLQ
+75,Akane_YAMAGUCHI_AN_Se_Young_DAIHATSU_YONEX_Japan_Open_2022_Finals,Japan Open 2022,Finals,2022,9,4,2,38,Akane YAMAGUCHI,An Se Young,1,https://www.youtube.com/watch?v=3TN7h0i7mAQ
+76,Akane_YAMAGUCHI_CHEN_Yu_Fei_England_Open_2022_Semi_finals,YONEX All England Open Badminton Championships 2022,Semi-finals,2022,3,19,2,41,Akane YAMAGUCHI,CHEN Yufei,0,https://www.youtube.com/watch?v=yDpq1BP3o10
+77,Busanan_ONGBAMRUNGPHAN_Supanida_KATETHONG_India_Open_2022_Finals,YONEX-SUNRISE India Open 2022,Finals,2022,1,16,3,76,Busanan ONGBAMRUNGPHAN,Supanida KATETHONG,1,https://www.youtube.com/watch?v=eMDV0kIpyTU
+78,Lakshya_SEN_LEE_Zii_Jia_All_England_Open_2022_SemiFinals,YONEX All England Open Badminton Championships 2022,Semi-finals,2022,3,19,3,76,Lakshya SEN,LEE Zii Jia,0,https://www.youtube.com/watch?v=hCk_QUZdo_0
+79,Jonatan_CHRISTIE_KIDAMBI_Srikanth_Korea_Open_Badminton_Championships_2022_SemiFinals,Korea Open Badminton Championships 2022,Semi-finals,2022,4,9,2,49,Jonatan CHRISTIE,KIDAMBI Srikanth,0,https://www.youtube.com/watch?v=XfOTyOJLPJ4
+80,Supanida_KATETHONG_PUSARLA_V._Sindhu_India_Open_2022_SemiFinals,YONEX-SUNRISE India Open 2022,Semi-finals,2022,1,15,3,59,Supanida KATETHONG,PUSARLA V. Sindhu,1,https://www.youtube.com/watch?v=3u_sWFc9Pmw
+81,Busanan_ONGBAMRUNGPHAN_Aakarshi_KASHYAP_YONEX_SUNRISE_India_Open_2022_Semifinals,YONEX-SUNRISE India Open 2022,Semi-finals,2022,1,15,2,52,Busanan ONGBAMRUNGPHAN,Aakarshi KASHYAP,0,https://www.youtube.com/watch?v=K3pR7B8PbcM
+82,Lee_Zii_Jia_Li_Shi_Feng_GR_TOYOTA_GAZOO_RACING_Thailand_Open_2022_Finals,Thailand Open 2022,Finals,2022,5,22,3,70,LEE Zii Jia,LI Shi Feng,0,https://www.youtube.com/watch?v=pp134m934s8
+83,LI_Shi_Feng_Kodai_NARAOKAGR_Thailand_Open_2022_Semi_finals,Thailand Open 2022,Semi-finals,2022,5,21,3,93,LI Shi Feng,Kodai NARAOKA,1,https://www.youtube.com/watch?v=s5ZlsOBrUfY
+84,SHI_Yu Qi_LEE_Zii_Jia_Denmark_Open_2022_Final,Denmark Open 2022,Finals,2022,10,23,3,67,SHI Yuqi,LEE Zii Jia,0,https://www.youtube.com/watch?v=HEbfgwOQgRY
+85,Lee_Zii_Jia_Loh_Kean_Yew_Denmark_Open_2022_Semifinals,Denmark Open 2022,Semi-finals,2022,10,22,2,40,LEE Zii Jia,LOH Kean Yew,1,https://www.youtube.com/watch?v=jaRBm3uc3jU
+86,HE_Bing_Jiao_CHEN_Yu_Fei_Denmark_Open_2022_Final,Denmark Open 2022,Finals,2022,10,23,3,67,HE Bingjiao,CHEN Yufei,1,https://www.youtube.com/watch?v=1-9iQsVnrHc
+87,CHEN_Yu_Fei_Ratchanok_INTANON_Denmark_Open_2022_SemiFinals,Denmark Open 2022,Semi-finals,2022,10,22,3,59,CHEN Yufei,Ratchanok INTANON,0,https://www.youtube.com/watch?v=Da1aS0Kjqro
+88,HE_Bing_Jiao_Carolina_MARIN_French_Open_2022_Final,French Open 2022,Finals,2022,10,30,3,76,HE Bingjiao,Carolina MARIN,0,https://www.youtube.com/watch?v=Fen035XwMPw
+89,Viktor_AXELSEN_Rasmus_GEMKE_French_Open_2022 _Finals,French Open 2022,Finals,2022,10,30,2,43,Viktor AXELSEN,Rasmus GEMKE,0,https://www.youtube.com/watch?v=FYQCIkw32jw
+90,Viktor_AXELSEN_Kodai_NARAOKA_YONEX_French_Open_2022_Semifinals,French Open 2022,Semi-finals,2022,10,29,2,45,Viktor AXELSEN,Kodai NARAOKA,1,https://www.youtube.com/watch?v=CpeAGY7xwtI
+91,SHI_Yu_Qi_Kodai_NARAOKA_Denmark_Open_2022_SemiFinals,Denmark Open 2022,Semi-finals,2022,10,22,3,77,SHI Yuqi,Kodai NARAOKA,1,https://www.youtube.com/watch?v=RMPUSOPcACc
+92,AN_Se_Young_Pornpawee_CHOCHUWONG_Korea_Open_Badminton_Championships_2022_Finals,Korea Open Badminton Championships 2022,Finals,2022,4,10,2,52,An Se Young,Pornpawee CHOCHUWONG,1,https://www.youtube.com/watch?v=vQ31Nc27jzM
+93,Carolina_MARIN_Akane_YAMAGUCHI_French_Open_2022_SemiFinals,French Open 2022,Semi-finals,2022,10,29,2,47,Carolina MARIN,Akane YAMAGUCHI,1,https://www.youtube.com/watch?v=QpxcHjF7D3Y
+94,Viktor_AXELSEN_ZHAO_Jun_Peng_Indonesia_Open_2022_Final,INDONESIA OPEN 2022,Finals,2022,6,19,2,75,Viktor AXELSEN,ZHAO Jun Peng,0,https://www.youtube.com/watch?v=q-wX5sfFXic
+95,CHEN_Yu_Fei_PUSARLA_V._Sindhu_Thailand_Open_2022_SemiFinals,Thailand Open 2022,Semi-finals,2022,5,21,2,43,CHEN Yufei,PUSARLA V. Sindhu,1,https://www.youtube.com/watch?v=T6evDKhWtgI
+96,,,,,,,,,,,,
+97,,,,,,,,,,,,
+98,,,,,,,,,,,,
+99,,,,,,,,,,,,
+100,,,,,,,,,,,,
+101,,,,,,,,,,,,
+102,,,,,,,,,,,,

@@ -141,12 +141,12 @@ TAGGED_PREFIX = "tag-"   # format_tagged.py prefixes every tagged id with this
 
 VAL_MATCH_IDS = {
     "2", "7", "11", "18", "21", "29", "30", "31", "36", "40",
-    "43", "49", "53", "57", "60", "65", "67", "71", "76", "84",
-    "89", "93", "96", "tag-1"
+    "43", "53", "57", "60", "65", "67", "71", "76", "84",
+    "89", "93", "tag-1"
 }  # 23 matches
 
 TEST_MATCH_IDS = {
-    "5", "16", "24", "38", "47", "58", "69", "80", "91", "tag-3",
+    "5", "16", "24", "38", "58", "69", "80", "91", "tag-3",
 }  # 9 matches
 
 assert not (VAL_MATCH_IDS & TEST_MATCH_IDS), "a match can't be in both VAL and TEST"
